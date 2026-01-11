@@ -14,6 +14,7 @@ export type RunInput = {
 export type RunResult = {
   output: string;
   latencyMs: number;
+  ttftMs?: number | null;
   tokenUsage?: {
     promptTokens: number;
     completionTokens: number;

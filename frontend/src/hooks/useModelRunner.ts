@@ -6,6 +6,7 @@ type RunResponse = {
   output: string;
   metrics: {
     latencyMs: number;
+    ttftMs: number | null;
     costUsd: number | null;
   };
 };
@@ -39,6 +40,7 @@ export function useModelRunner() {
       setResult({
         output: data.output,
         latencyMs: data.metrics.latencyMs,
+        ttftMs: data.metrics.ttftMs,
         costUsd: data.metrics.costUsd,
       });
     } catch (err: any) {

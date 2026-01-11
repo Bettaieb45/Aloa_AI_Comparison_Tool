@@ -12,5 +12,6 @@ export type Provider = {
 export type RunResult = {
   output: string;
   latencyMs: number;
+  ttftMs: number | null;
   costUsd: number | null;
 };

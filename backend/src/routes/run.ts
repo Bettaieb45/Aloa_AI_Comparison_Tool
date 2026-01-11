@@ -58,6 +58,7 @@ router.post("/", async (req, res) => {
       output: result.output,
       metrics: {
         latencyMs: result.latencyMs,
+        ttftMs: (result as any).ttftMs ?? null,
         costUsd: (result as any).costUsd ?? null
       }
     });

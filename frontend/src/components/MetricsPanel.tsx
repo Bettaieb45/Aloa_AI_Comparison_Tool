@@ -7,7 +7,11 @@ type Props = {
 export default function MetricsPanel({ result }: Props) {
   return (
     <div className="metrics">
-      <span>Latency: {result.latencyMs} ms</span>
+      <span>
+        Speed (TTFT):{" "}
+        {result.ttftMs === null ? "—" : `${result.ttftMs} ms`}
+      </span>
+      <span>Total: {result.latencyMs} ms</span>
       <span>
         Cost:{" "}
         {result.costUsd === null

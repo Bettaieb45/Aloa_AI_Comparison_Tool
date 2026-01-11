@@ -70,6 +70,11 @@ export const openRouterProvider: AIProvider = {
 
 
     const start = Date.now();
+    let firstTokenAt: number | null = null;
+    let output = "";
+    let usage:
+      | { prompt_tokens?: number; completion_tokens?: number }
+      | undefined;
 
     const response = await fetch(
       `${OPENROUTER_BASE_URL}/chat/completions`,
@@ -83,9 +88,9 @@ export const openRouterProvider: AIProvider = {
         },
         body: JSON.stringify({
           model: input.model,
-          messages: [
-            { role: "user", content: input.prompt }
-          ]
+          stream: true,
+          stream_options: { include_usage: true },
+          messages: [{ role: "user", content: input.prompt }]
         })
       }
     );
@@ -95,20 +100,98 @@ export const openRouterProvider: AIProvider = {
       throw new Error(`OpenRouter error: ${errorText}`);
     }
 
-    const data = await response.json();
+    if (!response.body) {
+      throw new Error("OpenRouter response body is empty");
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let done = false;
+
+    while (!done) {
+      const { value, done: streamDone } = await reader.read();
+      done = streamDone;
+
+      if (value) {
+        buffer += decoder.decode(value, { stream: true });
+      }
+
+      let lineBreakIndex = buffer.indexOf("\n");
+      while (lineBreakIndex !== -1) {
+        const line = buffer.slice(0, lineBreakIndex).trim();
+        buffer = buffer.slice(lineBreakIndex + 1);
+        lineBreakIndex = buffer.indexOf("\n");
+
+        if (!line.startsWith("data:")) {
+          continue;
+        }
+
+        const data = line.slice(5).trim();
+        if (data === "[DONE]") {
+          done = true;
+          break;
+        }
+
+        try {
+          const parsed = JSON.parse(data);
+          const delta =
+            parsed.choices?.[0]?.delta?.content ??
+            parsed.choices?.[0]?.message?.content ??
+            "";
+
+          if (delta) {
+            if (firstTokenAt === null) {
+              firstTokenAt = Date.now();
+            }
+            output += delta;
+          }
+
+          if (parsed.usage) {
+            usage = parsed.usage;
+          }
+        } catch {
+          // Ignore malformed stream chunks.
+        }
+      }
+    }
+
+    if (buffer.trim().startsWith("data:")) {
+      const data = buffer.trim().slice(5).trim();
+      if (data && data !== "[DONE]") {
+        try {
+          const parsed = JSON.parse(data);
+          const delta =
+            parsed.choices?.[0]?.delta?.content ??
+            parsed.choices?.[0]?.message?.content ??
+            "";
+
+          if (delta) {
+            if (firstTokenAt === null) {
+              firstTokenAt = Date.now();
+            }
+            output += delta;
+          }
+
+          if (parsed.usage) {
+            usage = parsed.usage;
+          }
+        } catch {
+          // Ignore malformed stream chunks.
+        }
+      }
+    }
 
     const latencyMs = Date.now() - start;
-
-    const output =
-      data.choices?.[0]?.message?.content ?? "No output returned";
+    const ttftMs = firstTokenAt ? firstTokenAt - start : null;
 
     let costUsd: number | undefined;
 
-    if (data.usage && data.model) {
-      const model = this.models.find(m => m.id === data.model);
+    if (usage) {
+      const model = this.models.find(m => m.id === input.model);
 
-      const promptTokens = data.usage.prompt_tokens ?? 0;
-      const completionTokens = data.usage.completion_tokens ?? 0;
+      const promptTokens = usage.prompt_tokens ?? 0;
+      const completionTokens = usage.completion_tokens ?? 0;
 
       if (model?.pricePer1kTokensUsd) {
         costUsd =
@@ -118,12 +201,13 @@ export const openRouterProvider: AIProvider = {
     }
 
     return {
-      output,
+      output: output || "No output returned",
       latencyMs,
-      tokenUsage: data.usage
+      ttftMs,
+      tokenUsage: usage
         ? {
-            promptTokens: data.usage.prompt_tokens,
-            completionTokens: data.usage.completion_tokens
+            promptTokens: usage.prompt_tokens ?? 0,
+            completionTokens: usage.completion_tokens ?? 0
           }
         : undefined,
       ...(costUsd !== undefined ? { costUsd } : {})

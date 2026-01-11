@@ -1,5 +1,5 @@
 import { AIProvider, RunInput, RunResult, ModelConfig } from "./Provider";
-import { generateText } from "ai";
+import { streamText } from "ai";
 import { gateway } from "@ai-sdk/gateway";
 
 const AI_GATEWAY_BASE_URL = "https://ai-gateway.vercel.sh/v1";
@@ -50,17 +50,27 @@ export const vercelProvider: AIProvider = {
     }
 
     const start = Date.now();
+    let firstTokenAt: number | null = null;
 
-    const result = await generateText({
+    const result = streamText({
       model: gateway(input.model),
-      prompt: input.prompt
+      prompt: input.prompt,
+      onChunk: ({ chunk }) => {
+        if (chunk.type === "text-delta" && chunk.text) {
+          if (firstTokenAt === null) {
+            firstTokenAt = Date.now();
+          }
+        }
+      }
     });
 
+    const output = await result.text;
     const latencyMs = Date.now() - start;
+    const ttftMs = firstTokenAt ? firstTokenAt - start : null;
 
-    // ✅ SDK-exposed usage (THIS IS THE KEY)
-    const promptTokens = result.usage?.inputTokens ?? 0;
-    const completionTokens = result.usage?.outputTokens ?? 0;
+    const usage = await result.usage;
+    const promptTokens = usage?.inputTokens ?? 0;
+    const completionTokens = usage?.outputTokens ?? 0;
 
     let costUsd: number | undefined;
 
@@ -73,8 +83,9 @@ export const vercelProvider: AIProvider = {
     }
 
     return {
-      output: result.text,
+      output,
       latencyMs,
+      ttftMs,
       tokenUsage: {
         promptTokens,
         completionTokens

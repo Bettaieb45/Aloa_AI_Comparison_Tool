@@ -85,6 +85,7 @@ Response:
   },
   "metrics": {
     "latencyMs": 1234,
+    "ttftMs": 210,
     "costUsd": 0.0012
   }
 }
@@ -101,6 +102,11 @@ Validation errors return HTTP 400:
 - Measured per request inside each provider's `run` method.
 - Calculated as `Date.now()` before the provider call and after it finishes.
 - Includes network time + provider processing time.
+
+### Time to First Token (TTFT)
+- Measured when streaming responses from providers.
+- Calculated as the time from request start to the first text delta.
+- If a provider does not return deltas, `ttftMs` is `null`.
 
 ### Token Usage
 - Pulled from the provider response when available.
