@@ -17,16 +17,24 @@ const corsOrigins = (
   .map((origin) => origin.trim())
   .filter(Boolean);
 
+const corsOriginPatterns = [
+  /^https?:\/\/localhost:5173$/,
+  /^https:\/\/.*\.vercel\.app$/,
+];
+
 app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin) {
         return callback(null, true);
       }
-      if (corsOrigins.includes(origin)) {
+      if (
+        corsOrigins.includes(origin) ||
+        corsOriginPatterns.some((pattern) => pattern.test(origin))
+      ) {
         return callback(null, true);
       }
-      return callback(new Error(`CORS blocked for origin: ${origin}`));
+      return callback(null, false);
     },
   })
 );

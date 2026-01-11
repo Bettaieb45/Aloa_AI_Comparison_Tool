@@ -27,7 +27,8 @@ Default server URL: `http://localhost:3001`
 
 ## CORS
 
-Only allows requests from `http://localhost:5173` (see `backend/src/index.ts`).
+Allows `http://localhost:5173` and `https://*.vercel.app` by default.
+Override or add origins via `CORS_ORIGINS` (see `backend/src/index.ts`).
 
 ## API Endpoints
 
