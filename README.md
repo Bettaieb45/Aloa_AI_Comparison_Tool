@@ -16,7 +16,7 @@ easy to deploy independently.
 - **Provider abstraction:** each provider lives in its own module to keep API
   logic predictable and to make adding new providers low-risk.
 - **Explicit environment config:** API keys and provider URLs stay server-side,
-  while the frontend only needs a single `VITE_API_BASE`.
+  while the frontend only needs a single `AI_GATEWAY_API_KEY`.
 - **Single source of truth for models:** the backend loads and normalizes models
   so the UI can present consistent options regardless of provider quirks.
 
@@ -77,5 +77,5 @@ fairly.
 - Update the UI by adding new cards/columns in `frontend/src/`.
 
 ## Notes
-- The UI expects the backend to be reachable at `VITE_API_BASE`.
+- The UI expects the backend to be reachable at `AI_GATEWAY_API_KEY`.
 - API keys must remain in the backend `.env` and never be exposed to the client.
