@@ -95,6 +95,28 @@ Validation errors return HTTP 400:
 { "error": "provider, model and prompt are required" }
 ```
 
+## Metrics & Cost Calculation
+
+### Latency
+- Measured per request inside each provider's `run` method.
+- Calculated as `Date.now()` before the provider call and after it finishes.
+- Includes network time + provider processing time.
+
+### Token Usage
+- Pulled from the provider response when available.
+- OpenRouter uses `usage.prompt_tokens` and `usage.completion_tokens`.
+- Vercel AI Gateway uses `result.usage.inputTokens` and `result.usage.outputTokens`.
+
+### Cost
+- Returned only when both pricing metadata and token usage are available.
+- OpenRouter: `pricePer1kTokensUsd` is derived from model prompt pricing
+  (`pricing.prompt` USD per token * 1000). Cost is:
+  `(promptTokens + completionTokens) / 1000 * pricePer1kTokensUsd`.
+- Vercel AI Gateway: `pricePer1kTokensUsd` is derived from gateway input pricing
+  (`pricing.input` USD per token * 1000). Cost uses total tokens
+  (input + output) against that rate.
+- If pricing is missing, `costUsd` is omitted from the response.
+
 ## Providers
 
 ### OpenRouter
