@@ -23,6 +23,7 @@ Default server URL: `http://localhost:3001`
 - `OPENROUTER_API_KEY` (required for OpenRouter)
 - `AI_GATEWAY_API_KEY` (required for Vercel AI Gateway)
 - `PORT` (optional, defaults to `3001`)
+- `CORS_ORIGINS` (optional, comma-separated list of allowed origins; defaults to `http://localhost:5173`)
 
 ## CORS
 
