@@ -4,6 +4,8 @@ Express API that exposes available model providers and runs prompts against
 selected models. This backend is designed to be consumed by the frontend
 at `http://localhost:5173`.
 
+Live API URL: `https://aloa-ai-comparison-tool.onrender.com`
+
 ## Quick Start
 
 1. Create a `.env` in `backend/` with the required keys.
@@ -16,7 +18,7 @@ npm install
 npm run dev
 ```
 
-Default server URL: `http://localhost:3001`
+Default server URL: `http://localhost:3001` (live: `https://aloa-ai-comparison-tool.onrender.com`)
 
 ## Environment Variables
 

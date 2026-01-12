@@ -1,8 +1,9 @@
 # AI Comparison Tool
 
-Compare multiple AI models side-by-side with a single prompt. This repo is split
-into a frontend UI and a backend API so each layer stays focused, testable, and
-easy to deploy independently.
+Compare multiple AI models side-by-side with a single prompt. Live UI:
+`https://aloa-ai-comparison-tool.vercel.app/`. This repo is split into a
+frontend UI and a backend API so each layer stays focused, testable, and easy
+to deploy independently.
 
 ## Project Overview
 - **Frontend (Vite + React + TypeScript):** fast local dev, small bundle size,
@@ -29,6 +30,22 @@ easy to deploy independently.
 ## Repository Layout
 - `frontend/` React UI (Vite, TypeScript)
 - `backend/` Express API (TypeScript)
+
+## Hosting (Production)
+### Frontend (Vercel)
+- **Project:** `aloa-ai-comparison-tool`
+- **URL:** `https://aloa-ai-comparison-tool.vercel.app/`
+- **Root directory:** `frontend/`
+- **Build command:** `npm run dev`
+- **Output directory:** `frontend/`
+
+### Backend (Render)
+- **Service:** `Aloa_AI_Comparison_Tool`
+- **URL:** `https://aloa-ai-comparison-tool.onrender.com`
+- **Root directory:** `backend/`
+- **Build command:** `npm install`
+- **Start command:** `npm run dev`
+- **Environment:** same variables as `backend/.env.example`
 
 ## Local Development
 Run the backend first, then the frontend.
